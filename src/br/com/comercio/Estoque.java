@@ -89,9 +89,10 @@ public class Estoque {
 	 * @return the ItemEstoque in ItemEstoques
 	 */
 	public ItemEstoque getItemEstoqueById(int id) {
-		if(id < 0 || id > this.getItemEstoques().size())
-			throw new IllegalArgumentException("Invalid argument of 'id'");
-		return this.ItensEstoque.get(id);
+		for(ItemEstoque item : this.ItensEstoque) {
+			if(item.getId() == id) return item;
+		}
+		throw new IllegalArgumentException("Invalid argument of 'id'");			
 	}
 	
 	public void addProduct(ItemEstoque ItemEstoque) {		
@@ -117,7 +118,12 @@ public class Estoque {
 			this.setUpdatedAt();
 		}
 	}
-
+	
+	public void setQuantidadeItemEstoque(int itemId, int quantidade) {
+		ItemEstoque item = this.getItemEstoqueById(itemId);
+		item.setQuantidade(quantidade);
+	}
+	
 	/**
 	 * @return the createdAt
 	 */
@@ -137,11 +143,5 @@ public class Estoque {
 	 */
 	public void setUpdatedAt() {
 		this.updatedAt = Instant.now();
-	}
-
-	@Override
-	public String toString() {
-		return "Estoque [descricao=" + descricao + ", ItensEstoques=" + ItensEstoque
-				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
 }

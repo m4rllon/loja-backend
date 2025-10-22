@@ -3,10 +3,12 @@ package br.com.comercio;
 import java.math.BigDecimal;
 
 public class ItemVenda {
+	private int id;
 	private Estoque estoqueDoProduto;
 	private ItemEstoque produtoVendido;
 	private int quantidade;
 	private BigDecimal precoDaVenda;
+	private BigDecimal subtotal;
 	
 	public ItemVenda(ItemEstoque produtoVendido, int quantidade, BigDecimal precoDaVenda, Estoque estoqueDoProduto){
 		if(quantidade <= 0)
@@ -16,12 +18,40 @@ public class ItemVenda {
 		
 		this.produtoVendido = produtoVendido;
 		this.quantidade = quantidade;
+		this.precoDaVenda = precoDaVenda;
+		this.subtotal = this.precoDaVenda.multiply(new BigDecimal(String.valueOf(this.quantidade)));
+		this.id = produtoVendido.getId();
+		this.estoqueDoProduto= estoqueDoProduto;
 	}
 	
+	public ItemVenda(ItemEstoque produtoVendido, int quantidade, Estoque estoqueDoProduto){
+		if(quantidade <= 0)
+			throw new IllegalArgumentException("Invalid argument of 'quantidade'.");
+		if(precoDaVenda.intValue() <= 0)
+			throw new IllegalArgumentException("Invalid argument of 'precoDaVenda'.");
+		
+		this.produtoVendido = produtoVendido;
+		this.quantidade = quantidade;
+		this.precoDaVenda = produtoVendido.getProduto().getPrecoAsBigDecimal();
+		this.subtotal = this.precoDaVenda.multiply(new BigDecimal(String.valueOf(this.quantidade)));
+		this.id = produtoVendido.getId();
+		this.estoqueDoProduto= estoqueDoProduto;
+	}
 	
+	/**
+	 * @param subtotal the subtotal to set
+	 */
+	protected void setSubtotal() {
+		this.subtotal = this.precoDaVenda.multiply(
+				new BigDecimal(String.valueOf(this.quantidade))
+				);		
+	}
+	
+	/**
+	 * @return the subtotal
+	 */
 	public BigDecimal getSubtotal() {
-		BigDecimal subtotal = new BigDecimal(this.getQuantidade()*this.getPrecoDaVenda().intValue());
-		return subtotal;
+		return this.subtotal;
 	}
 
 	
@@ -35,10 +65,11 @@ public class ItemVenda {
 	/**
 	 * @param precoDaVenda the precoDaVenda to set
 	 */
-	public void setPrecoDaVenda(BigDecimal precoDaVenda) {
+	protected void setPrecoDaVenda(BigDecimal precoDaVenda) {
 		if(precoDaVenda.intValue() <= 0)
 			throw new IllegalArgumentException("Invalid argument of 'precoDaVenda'.");
 		this.precoDaVenda = precoDaVenda;
+		this.setSubtotal();
 	}
 
 	/**
@@ -51,7 +82,7 @@ public class ItemVenda {
 	/**
 	 * @param produtoVendido the produtoVendido to set
 	 */
-	public void setProdutoVendido(ItemEstoque produtoVendido) {
+	protected void setProdutoVendido(ItemEstoque produtoVendido) {
 		this.produtoVendido = produtoVendido;
 	}
 
@@ -65,10 +96,38 @@ public class ItemVenda {
 	/**
 	 * @param quantidade the quantidade to set
 	 */
-	public void setQuantidade(int quantidade) {
+	protected void setQuantidade(int quantidade) {
 		if(quantidade <= 0)
 			throw new IllegalArgumentException("Invalid argument of 'quantidad'.");
 		this.quantidade = quantidade;
+		this.setSubtotal();
+	}
+
+	/**
+	 * @return the estoqueDoProduto
+	 */
+	public Estoque getEstoqueDoProduto() {
+		return estoqueDoProduto;
+	}
+
+	/**
+	 * @param estoqueDoProduto the estoqueDoProduto to set
+	 */
+	protected void setEstoqueDoProduto(Estoque estoqueDoProduto) {
+		this.estoqueDoProduto = estoqueDoProduto;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public String toString() {
+		return "ItemVenda [id=" + id + ", estoqueDoProduto=" + ", produtoVendido=" + produtoVendido
+				+ ", quantidade=" + quantidade + ", precoDaVenda=" + precoDaVenda + ", subtotal=" + subtotal + "]";
 	}
 	
 	

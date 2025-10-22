@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 public class Venda {
+	private int id;
 	private ArrayList<ItemVenda> produtosVendidos;
 	private Instant dataDaCompra;
 	private BigDecimal valorTotal;
@@ -16,75 +17,71 @@ public class Venda {
 			throw new IllegalArgumentException("Invalid argument of 'produtosVendidos'.");
 		if(formaDePagamento.length() == 0)
 			throw new IllegalArgumentException("Invalid argument of 'formaDePagamento'.");
-		
 		this.produtosVendidos = produtosVendidos;
 		this.dataDaCompra = dataDaCompra;
 		this.formaDePagamento = formaDePagamento;
-		
-		int valorTotal = 0;
-		for(int i = 0; i < this.produtosVendidos.size(); i++) {
-			valorTotal += produtosVendidos.get(i).getSubtotal().intValue();
-		}
-		
-		this.valorTotal = new BigDecimal(valorTotal);
+		this.setValorTotal();
 	}
 	
 	public Venda(Instant dataDaCompra, String formaDePagamento) {
 		if(formaDePagamento.length() == 0)
 			throw new IllegalArgumentException("Invalid argument of 'formaDePagamento'.");
-		
 		this.produtosVendidos = new ArrayList<ItemVenda>();
 		this.dataDaCompra = dataDaCompra;
 		this.formaDePagamento = formaDePagamento;
-		
-		int valorTotal = 0;
-		for(int i = 0; i < this.produtosVendidos.size(); i++) {
-			valorTotal += produtosVendidos.get(i).getSubtotal().intValue();
-		}
-		
-		this.valorTotal = new BigDecimal(valorTotal);
+		this.valorTotal = BigDecimal.ZERO;
 	}
 	
-	
-	
-	public ItemVenda getProductById(int id) {
-		if(id < 0 || id > this.getProdutosVendidos().size())
-			throw new IllegalArgumentException("Invalid argument of 'id'");
-		return this.getProdutosVendidos().get(id);
+//	ADICIONAR RECURSO DE RETIRAR QUANTIDADE DO PRODUTO NO ESTOQUE
+	public void addProduto(ItemVenda novoItem) {
+		this.produtosVendidos.add(novoItem);
 	}
-
-	public boolean removeProduct(int id) {
-		try {
-			this.addQtdItemEstoque(
-					this.produtosVendidos.get(id).getProdutoVendido(), 
-					this.produtosVendidos.get(id).getQuantidade()
-					);
-			this.produtosVendidos.remove(id);
-			return true;
-		} catch (Exception e) {
-			throw new NoSuchElementException("Unable to remove product. Invalid position: " + id);
-		}
-	}
-	
-	public void addProduct(ItemVenda novoItem) {
-		this.removeQtdItemEstoque(novoItem.getProdutoVendido(), novoItem.getQuantidade());
+	public void addProduto(ItemEstoque item, int quantidadeVendida, BigDecimal precoDaVenda) {
+		ItemVenda novoItem = new ItemVenda(item, quantidadeVendida, precoDaVenda, item.getEstoque());
 		this.produtosVendidos.add(novoItem);
 	}
 	
-	public void addProduct(ItemEstoque produto, int quantidaDeVendida, BigDecimal precoDaVenda) {
-		ItemVenda novoItemVendido = new ItemVenda(produto, quantidaDeVendida, precoDaVenda, produto.getEstoque());
-		this.removeQtdItemEstoque(novoItemVendido.getProdutoVendido(), novoItemVendido.getQuantidade());
-		this.produtosVendidos.add(novoItemVendido);
-	}
-	
-	private boolean removeQtdItemEstoque(ItemEstoque item, int quantidadeRetirada) {
-		item.removeQuantidadeTotal(quantidadeRetirada);
+//	ADICIONAR RECURSO DE ADICIONAR QUANTIDADE DO PRODUTO NO ESTOQUE
+	public boolean removeProduto(int itemId) {
+		for(ItemVenda item : this.produtosVendidos) {
+			if(itemId == item.getId()) this.produtosVendidos.remove(item);
+		}
 		return true;
 	}
 	
-	private boolean addQtdItemEstoque(ItemEstoque item, int quantidadeAdicionada) {
-		item.addQuantidadeTotal(quantidadeAdicionada);;
-		return true;
+	
+	public void setQtdItemVendaById(int itemId, int quantidade) {
+		this.setNewQtdEstoque(itemId, quantidade);
+		this.getItemVendaById(itemId).setQuantidade(quantidade);
+		this.setValorTotal();		
+	}
+	
+	public void setNewQtdEstoque(int itemVendaId, int quantidade) {
+		int quantidadeVendidaInicial = this.getItemVendaById(itemVendaId).getQuantidade();
+		System.out.println(this.getItemVendaById(itemVendaId).toString());
+		Estoque estoque = this.getItemVendaById(itemVendaId).getEstoqueDoProduto();
+		int idItemEstoque = itemVendaId;
+		ItemEstoque itemEstoque = this.getItemVendaById(itemVendaId).getProdutoVendido();
+//		o método precisa receber a quantidade certa que precisa estar no estoque
+		int novaQuantidadeNoEstoque = itemEstoque.getQuantidadeTotal() + (quantidadeVendidaInicial - quantidade);
+		estoque.setQuantidadeItemEstoque(idItemEstoque, novaQuantidadeNoEstoque);		
+	}
+	
+	public ItemVenda getItemVendaById(int itemId) {
+		for(ItemVenda item : this.produtosVendidos) {
+			if(item.getProdutoVendido().getId() == itemId) return item;
+		}
+		throw new IllegalArgumentException("Invalid argument of 'itemId'.");
+	}
+	
+	public boolean setPrecoDaVendaDoProduto(int itemId, BigDecimal novoPreco) {
+		try {
+			this.getItemVendaById(itemId).setPrecoDaVenda(novoPreco);
+			this.setValorTotal();
+			return true;
+		} catch(Exception e) {
+			throw new IllegalArgumentException("Invalid argument of 'itemId' or 'novoPreco'.");
+		}
 	}
 	
 	/**
@@ -99,6 +96,7 @@ public class Venda {
 	 */
 	public void setProdutosVendidos(ArrayList<ItemVenda> produtosVendidos) {
 		this.produtosVendidos = produtosVendidos;
+		this.setValorTotal();
 	}
 
 	/**
@@ -125,8 +123,13 @@ public class Venda {
 	/**
 	 * @param valorTotal the valorTotal to set
 	 */
-	public void setValorTotal(BigDecimal valorTotal) {
-		this.valorTotal = valorTotal;
+	public void setValorTotal() {
+		BigDecimal newValorTotal = BigDecimal.ZERO;
+		for(ItemVenda item : this.produtosVendidos) {
+			BigDecimal subtotalItem = item.getSubtotal();
+			newValorTotal = newValorTotal.add(subtotalItem);
+		}
+		this.valorTotal = newValorTotal;
 	}
 
 	/**
@@ -141,5 +144,11 @@ public class Venda {
 	 */
 	public void setFormaDePagamento(String formaDePagamento) {
 		this.formaDePagamento = formaDePagamento;
+	}
+
+	@Override
+	public String toString() {
+		return "Venda [produtosVendidos=" + produtosVendidos + ", dataDaCompra=" + dataDaCompra + ", valorTotal="
+				+ this.getValorTotal()+ ", formaDePagamento=" + formaDePagamento + "]";
 	}
 }

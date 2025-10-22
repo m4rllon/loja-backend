@@ -16,6 +16,24 @@ public class ItemEstoque {
 		numItensNoEstoque++;
 		this.id = numItensNoEstoque;
 	}
+	
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+
 
 	/**
 	 * @return the estoque
@@ -51,16 +69,18 @@ public class ItemEstoque {
 	public int getQuantidadeTotal() {
 		return quantidadeTotal;
 	}
-
-	public void addQuantidadeTotal(int quantidade) {
+	
+	public void setQuantidade(int quantidade) {
 		if(quantidade <= 0)
 			throw new IllegalArgumentException("Invalid argument of 'quantidade'.");
-		this.quantidadeTotal += quantidade;
+		this.quantidadeTotal = quantidade;
+	}
+
+	@Override
+	public String toString() {
+		return "ItemEstoque [id=" + id + ", estoque=" + estoque + ", produto=" + produto + ", quantidadeTotal="
+				+ quantidadeTotal + "]";
 	}
 	
-	public void removeQuantidadeTotal(int quantidade) {
-		if(quantidade <= 0 || quantidade > this.quantidadeTotal)
-			throw new IllegalArgumentException("Invalid argument of 'quantidade'.");
-		this.quantidadeTotal -= quantidade;
-	}
+	
 }

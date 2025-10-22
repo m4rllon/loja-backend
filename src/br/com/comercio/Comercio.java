@@ -27,16 +27,57 @@ public class Comercio {
 				12351235);
 		
 		Estoque estoque = new Estoque("Estoque para alimentos não perecíveis");
-		estoque.addProduct(arroz, 35);
-		estoque.addProduct(acucar, 25);
-		System.out.println(estoque.toString());
-		
-		System.out.println("Quantidade do item: " + estoque.getItemEstoqueById(0).getQuantidadeTotal());
+		estoque.addProduct(arroz, 135);
+		estoque.addProduct(acucar, 125);
+			
 		Venda venda = new Venda(Instant.now(), "DÉBITO");
-		venda.addProduct(estoque.getItemEstoqueById(0), 35, new BigDecimal("24.99"));
-		System.out.println("Nova quantidade do item após a venda: " + estoque.getItemEstoqueById(0).getQuantidadeTotal());
-		venda.removeProduct(0);
-		System.out.println("Nova quantidade do item após o cancelamento da venda: " + estoque.getItemEstoqueById(0).getQuantidadeTotal());
+		
+		venda.addProduto(
+				estoque.getItemEstoqueById(1), 
+				35, 
+				new BigDecimal("19.38")
+				);
+
+// 		TESTE: Quando a quantidade de um item vendido muda, o valor total da venda deve mudar também.
+//		System.out.println(venda.getValorTotal());
+//		venda.setQtdItemVendaById(1, 5);
+//		System.out.println(venda.getValorTotal());
+		
+//		TESTE: Quando os valores da venda de cada produto mudar, o preço total da venda deve mudar também:
+//		System.out.println("Preço total inicial da venda: " + venda.getValorTotal());
+//		System.out.println("Preço inicial do produto de id=1: " + venda.getItemVendaById(0).getPrecoDaVenda());
+//		venda.setPrecoDaVendaDoProduto(1, new BigDecimal("10.58"));
+//		System.out.println("Preço final do produto de id=1: " + venda.getItemVendaById(0).getPrecoDaVenda());
+//		System.out.println("Novo preço total da venda: " + venda.getValorTotal());
+
+//		TESTE: Quando a quantidade vendida de um item muda, a quantidade desse item em estoque deve mudar
+		System.out.println("Quantidade inicial do item no estoque: " + estoque.getItemEstoqueById(1).getQuantidadeTotal());
+		System.out.println("Quantidade vendida inicial: " + venda.getItemVendaById(1).getQuantidade());
+		
+		venda.setQtdItemVendaById(1, 55);
+		
+		System.out.println("Quantidade final do item no estoque: " + estoque.getItemEstoqueById(1).getQuantidadeTotal());
+		System.out.println("Quantidade vendida final: " + venda.getItemVendaById(1).getQuantidade());
+		
+//		IMPLEMENTAR METODOS PARA ADICIONAR E REMOVER ITENS DA VENDA 
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
